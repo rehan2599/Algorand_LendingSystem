@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  lending-platform-contracts-validate:
+    name: Run lending-platform-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/lending-platform-contracts-ci.yaml
+
+  lending-platform-contracts-release:
+    name: Run lending-platform-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/lending-platform-contracts-cd.yaml
+    needs: lending-platform-contracts-validate
+
+  lending-platform-frontend-validate:
+    name: Run lending-platform-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/lending-platform-frontend-ci.yaml
+
+  lending-platform-frontend-release:
+    name: Run lending-platform-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/lending-platform-frontend-cd.yaml
+    needs: lending-platform-frontend-validate
