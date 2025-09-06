@@ -19,6 +19,8 @@ const Home: React.FC<HomeProps> = () => {
   const { activeAddress, wallets } = useWallet()
   const isConnected = !!activeAddress
   const contractService = useContractService()
+  const [walletLoading, setWalletLoading] = useState(false)
+  const [disconnectLoading, setDisconnectLoading] = useState(false)
   
   const [aiAssessment, setAiAssessment] = useState<any>(null)
   const [isAssessing, setIsAssessing] = useState(false)
@@ -32,6 +34,22 @@ const Home: React.FC<HomeProps> = () => {
     guarantors: loanApplication.guarantors,
     avgLocalIncome: 300
   }
+
+  // Add debugging
+console.log('Wallet Debug:', { activeAddress, isConnected, wallets })
+
+// ADD THE useEffect HERE - RIGHT AFTER THE CONSOLE.LOG
+useEffect(() => {
+  console.log('=== Wallet State Debug ===')
+  console.log('activeAddress:', activeAddress)
+  console.log('isConnected:', isConnected)
+  console.log('wallets count:', wallets?.length)
+  console.log('wallet details:', wallets?.map(w => ({
+    id: w.id,
+    isConnected: w.isConnected,
+    accounts: w.accounts?.length
+  })))
+}, [activeAddress, wallets, isConnected])
 
   // Real-time AI assessment
   useEffect(() => {
@@ -56,19 +74,61 @@ const Home: React.FC<HomeProps> = () => {
   }, [loanApplication.amount, loanApplication.purpose])
 
   const handleDirectWalletConnect = async () => {
+    setWalletLoading(true)
+    
     try {
-      const luteWallet = wallets?.find(w => w.id === 'lute')
-      if (luteWallet && !luteWallet.isConnected) {
-        await luteWallet.connect()
+      if (!wallets || wallets.length === 0) {
+        alert('No wallets detected. Please install a wallet extension.')
+        return
       }
-      if (isConnected) {
+      
+      const targetWallet = wallets[0]
+      
+      if (targetWallet) {
+        await targetWallet.connect()
+        
+        // Simple wait for state update
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Navigate to dashboard regardless - let the dashboard handle the state
         setCurrentView('dashboard')
       }
+      
     } catch (error) {
-      console.error('Connection failed:', error)
-      alert('Wallet connection failed. Please try again.')
+      console.error('Connection error:', error)
+      alert(`Connection failed: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setWalletLoading(false)
     }
   }
+  
+  const handleDisconnect = async () => {
+    setDisconnectLoading(true)
+    
+    try {
+      if (wallets) {
+        for (const wallet of wallets) {
+          if (wallet.isConnected) {
+            await wallet.disconnect()
+          }
+        }
+      }
+      
+      localStorage.removeItem('@txnlab/use-wallet:v3')
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Navigate to home page (which shows login options)
+      setCurrentView('home')
+      
+    } catch (error) {
+      console.error('Disconnect failed:', error)
+      setCurrentView('home')
+    } finally {
+      setDisconnectLoading(false)
+    }
+  }
+
+  
 
   const handleHesabPayLogin = () => {
     if (userPhone.length >= 10) {
@@ -151,11 +211,19 @@ const Home: React.FC<HomeProps> = () => {
             </div>
 
             <div className="space-y-4">
-              <button
+            <button
                 onClick={handleDirectWalletConnect}
-                className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all"
+                disabled={walletLoading}
+                className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all disabled:opacity-50"
               >
-                Connect Algorand Wallet
+                {walletLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    Connecting Wallet...
+                  </div>
+                ) : (
+                  'Connect Algorand Wallet'
+                )}
               </button>
 
               <div className="divider text-gray-400">OR</div>
@@ -245,12 +313,13 @@ const Home: React.FC<HomeProps> = () => {
               </p>
               <p className="text-blue-100">Balance: 4,000 ALGO</p>
             </div>
-            <button
-              onClick={() => setCurrentView('home')}
-              className="text-white/80 hover:text-white underline"
-            >
-              Disconnect
-            </button>
+          <button
+          onClick={handleDisconnect}
+          disabled={disconnectLoading}
+          className="text-white/80 hover:text-white underline disabled:opacity-50"
+        >
+          {disconnectLoading ? 'Disconnecting...' : 'Disconnect Wallet'}
+        </button>
           </div>
         </div>
 
