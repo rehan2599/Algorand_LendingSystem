@@ -1,0 +1,196 @@
+#pragma version 10
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 1
+    bytecblock 0x151f7c75
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    txn NumAppArgs
+    bz main_bare_routing@10
+    pushbytess 0x02bece11 0xbeebeba1 0x8a2153e0 0x1e92c939 0xbcaf72ec // method "hello(string)string", method "getPoolStats()string", method "requestLoan(uint64,string)string", method "assessLoan(uint64)string", method "getLendingInfo()string"
+    txna ApplicationArgs 0
+    match main_hello_route@3 main_getPoolStats_route@4 main_requestLoan_route@5 main_assessLoan_route@6 main_getLendingInfo_route@7
+
+main_after_if_else@14:
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    pushint 0 // 0
+    return
+
+main_getLendingInfo_route@7:
+    // smart_contracts/lending_contract/contract.algo.ts:28
+    // getLendingInfo(): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    pushbytes 0x151f7c75005441666768616e20436f6d6d756e697479204c656e64696e673a2053657276696e672039342520756e62616e6b656420706f70756c6174696f6e207769746820626c6f636b636861696e20746563686e6f6c6f6779
+    log
+    intc_0 // 1
+    return
+
+main_assessLoan_route@6:
+    // smart_contracts/lending_contract/contract.algo.ts:20
+    // assessLoan(creditScore: uint64): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    txna ApplicationArgs 1
+    btoi
+    // smart_contracts/lending_contract/contract.algo.ts:20
+    // assessLoan(creditScore: uint64): string {
+    callsub assessLoan
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+main_requestLoan_route@5:
+    // smart_contracts/lending_contract/contract.algo.ts:15
+    // requestLoan(amount: uint64, purpose: string): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    txna ApplicationArgs 1
+    btoi
+    txna ApplicationArgs 2
+    extract 2 0
+    // smart_contracts/lending_contract/contract.algo.ts:15
+    // requestLoan(amount: uint64, purpose: string): string {
+    callsub requestLoan
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+main_getPoolStats_route@4:
+    // smart_contracts/lending_contract/contract.algo.ts:10
+    // getPoolStats(): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    pushbytes 0x151f7c75005141666768616e204c656e64696e6720506f6f6c3a203132352c3030302041464e20617661696c61626c65207c20323320616374697665206c6f616e73207c2039342e322520737563636573732072617465
+    log
+    intc_0 // 1
+    return
+
+main_hello_route@3:
+    // smart_contracts/lending_contract/contract.algo.ts:5
+    // hello(name: string): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    txna ApplicationArgs 1
+    extract 2 0
+    // smart_contracts/lending_contract/contract.algo.ts:5
+    // hello(name: string): string {
+    callsub hello
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_0 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+main_bare_routing@10:
+    // smart_contracts/lending_contract/contract.algo.ts:3
+    // export class LendingContract extends Contract {
+    txn OnCompletion
+    bnz main_after_if_else@14
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    intc_0 // 1
+    return
+
+
+// smart_contracts/lending_contract/contract.algo.ts::LendingContract.hello(name: bytes) -> bytes:
+hello:
+    // smart_contracts/lending_contract/contract.algo.ts:5
+    // hello(name: string): string {
+    proto 1 1
+    // smart_contracts/lending_contract/contract.algo.ts:6
+    // return `Hello, ${name}! Welcome to Afghan Community Lending Platform`
+    pushbytes "Hello, "
+    frame_dig -1
+    concat
+    pushbytes "! Welcome to Afghan Community Lending Platform"
+    concat
+    retsub
+
+
+// smart_contracts/lending_contract/contract.algo.ts::LendingContract.requestLoan(amount: uint64, purpose: bytes) -> bytes:
+requestLoan:
+    // smart_contracts/lending_contract/contract.algo.ts:15
+    // requestLoan(amount: uint64, purpose: string): string {
+    proto 2 1
+    // smart_contracts/lending_contract/contract.algo.ts:16
+    // return `Loan request submitted for ${purpose} in Afghanistan. Awaiting AI assessment...`
+    pushbytes "Loan request submitted for "
+    frame_dig -1
+    concat
+    pushbytes " in Afghanistan. Awaiting AI assessment..."
+    concat
+    retsub
+
+
+// smart_contracts/lending_contract/contract.algo.ts::LendingContract.assessLoan(creditScore: uint64) -> bytes:
+assessLoan:
+    // smart_contracts/lending_contract/contract.algo.ts:20
+    // assessLoan(creditScore: uint64): string {
+    proto 1 1
+    // smart_contracts/lending_contract/contract.algo.ts:21
+    // if (creditScore > 650) {
+    frame_dig -1
+    pushint 650 // 650
+    >
+    bz assessLoan_after_if_else@2
+    // smart_contracts/lending_contract/contract.algo.ts:22
+    // return `Congratulations! Loan approved. Supporting Afghan entrepreneurs!`
+    pushbytes "Congratulations! Loan approved. Supporting Afghan entrepreneurs!"
+    retsub
+
+assessLoan_after_if_else@2:
+    // smart_contracts/lending_contract/contract.algo.ts:24
+    // return `Assessment complete. Building financial inclusion in Afghanistan.`
+    pushbytes "Assessment complete. Building financial inclusion in Afghanistan."
+    retsub
